@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+<title>Still In It</title>
+
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#12294a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Still In It" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" href="icon-192.png" />
+
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #F6F6F2; overscroll-behavior-y: none; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  button { font-family: inherit; }
+  input, textarea { font-family: inherit; }
+  ::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+const STORAGE_KEY = "stillinit_v1";
+
+const PILLARS = [
+  { icon: "🦴", title: "The Science of Injury", desc: "How the body heals, why it takes time, the biology of inflammation and tissue repair — explained in plain language so athletes understand what's actually happening, not just 'rest and ice it.'", color: "#2d6a9f" },
+  { icon: "🧠", title: "The Mental Side", desc: "Runner's blues, identity loss, anxiety, and the grief of missing your sport. Normalize the emotional reality without making injured athletes feel broken. Science backs this up — cover it.", color: "#7b4ea8" },
+  { icon: "🛠️", title: "Real Gear & Hacks", desc: "Practical tools that actually help: waterproof cast covers & water boots so you can swim and go to pool parties, crutch alternatives, ways to stay connected to your team, and more.", color: "#2a9e6a" },
+  { icon: "🏃", title: "Your Story", desc: "First-person voice from someone who's been there. The water boot that saved your summer. The pool parties you almost missed. Personal experience is your biggest credibility edge.", color: "#c0632a" },
+];
+
+const INIT_IDEAS = [
+  { id: "i1", tag: "Science", idea: "What actually happens inside your body during healing — illustrated infographic" },
+  { id: "i2", tag: "Science", idea: "Why runners get depressed when injured: cortisol, endorphins, and identity" },
+  { id: "i3", tag: "Science", idea: "The difference between 'good pain' and 'bad pain' in recovery" },
+  { id: "i4", tag: "Science", idea: "Why sleep is actually the #1 recovery tool (with the research to back it)" },
+  { id: "i5", tag: "Mental", idea: "\"Runner's Blues\" explainer: the grief cycle of sports injury" },
+  { id: "i6", tag: "Mental", idea: "It's okay to be angry about your injury — here's why that's normal" },
+  { id: "i7", tag: "Mental", idea: "How to stay part of your team when you can't play" },
+  { id: "i8", tag: "Mental", idea: "What to say (and NOT say) to an injured athlete — for friends & coaches" },
+  { id: "i9", tag: "Hack", idea: "Water boot review: how it let me go to pool parties all summer with a foot injury" },
+  { id: "i10", tag: "Hack", idea: "Best waterproof cast covers for swimming (ranked + priced)" },
+  { id: "i11", tag: "Hack", idea: "How to stay in shape with an upper-body injury (zero leg exercises)" },
+  { id: "i12", tag: "Hack", idea: "Crutch hacks: backpack setups, tips for stairs, carrying stuff" },
+  { id: "i13", tag: "Hack", idea: "How to watch film and stay mentally sharp when you can't practice" },
+  { id: "i14", tag: "Story", idea: "My injury story — what happened, what I felt, what actually helped" },
+  { id: "i15", tag: "Story", idea: "Interview a teammate or friend who's been injured: their experience in their words" },
+  { id: "i16", tag: "Story", idea: "The moment I realized I wasn't alone — why I started this project" },
+];
+
+const INIT_WEEKS = [
+  { week: 1, month: 1, theme: "Foundation & Voice", color: "#2d6a9f",
+    tasks: [
+      { id: "1a", channel: "All", task: "Write your mission statement in 2 sentences: who this is for, and what you want them to feel after finding you" },
+      { id: "1b", channel: "Research", task: "Look up stats: how many youth athletes get injured per year, and how many report depression or anxiety during recovery" },
+      { id: "1c", channel: "Research", task: "Research 'runner's blues' and exercise-withdrawal science — find 2 solid sources (PubMed, ScienceDaily, sports medicine journals)" },
+      { id: "1d", channel: "Research", task: "Research the water boot / waterproof cast cover category — prices, brands, how they work — so your content is accurate" },
+      { id: "1e", channel: "Branding", task: "Choose a project name (something that sounds like a resource, not a charity — e.g. 'Still In It' or 'Bench Doesn't Mean Out')" },
+      { id: "1f", channel: "Branding", task: "Pick 2–3 brand colors and a font. Tip: avoid pure red (feels alarming) — try navy + orange or forest green + gold" },
+    ]},
+  { week: 2, month: 1, theme: "Website Build", color: "#2d6a9f",
+    tasks: [
+      { id: "2a", channel: "Website", task: "Choose a free builder: Wix or Squarespace (both have free tiers). Google Sites works too if you want zero cost" },
+      { id: "2b", channel: "Website", task: "Homepage: hero headline ('You're still an athlete, even on the bench'), mission paragraph, and your own photo or story teaser" },
+      { id: "2c", channel: "Website", task: "Create a 'Science of Recovery' page — explain healing biology in plain language, cite your sources" },
+      { id: "2d", channel: "Website", task: "Create a 'Mental Health & Runner's Blues' page — normalize the emotional experience, include what to expect" },
+      { id: "2e", channel: "Website", task: "Create a 'Gear & Hacks' page — water boot, cast covers, crutch tips, how to stay involved with your team" },
+      { id: "2f", channel: "Website", task: "Add a simple contact or 'share your story' form so others can reach out" },
+    ]},
+  { week: 3, month: 1, theme: "Instagram Launch", color: "#2d6a9f",
+    tasks: [
+      { id: "3a", channel: "Instagram", task: "Create account: username, bio ('Resources + real talk for injured athletes 🦴🧠 | Made by an athlete who gets it'), link to site" },
+      { id: "3b", channel: "Instagram", task: "Design 3 launch posts in Canva: (1) Who this is for, (2) Runner's Blues explainer graphic, (3) Your personal story post" },
+      { id: "3c", channel: "Instagram", task: "Create a Reel: 30–60 seconds, your voice, camera on yourself — 'here's why I started this and what happened to me'" },
+      { id: "3d", channel: "Instagram", task: "Set up Highlights: 'My Story', 'Science', 'Mental Health', 'Hacks & Gear'" },
+      { id: "3e", channel: "Instagram", task: "Research hashtags: #sportsinjury #injuredathlete #recoveryjourney #athletementalhealth + sport-specific ones" },
+    ]},
+  { week: 4, month: 1, theme: "Doctor Office Fliers", color: "#2d6a9f",
+    tasks: [
+      { id: "4a", channel: "Flier", task: "Flier angle: 'Your patient might be struggling — here's a resource made by a teen athlete who's been there' (speak to the doctor, not just the patient)" },
+      { id: "4b", channel: "Flier", task: "Flier content: project name, 2 stats about youth athlete mental health during injury, QR code to your website" },
+      { id: "4c", channel: "Flier", task: "Design in Canva — clean, professional, not clipart-y. Think sports medicine clinic aesthetic." },
+      { id: "4d", channel: "Flier", task: "Target offices: orthopedic surgeons, sports medicine clinics, physical therapy centers, pediatricians, urgent care" },
+      { id: "4e", channel: "Flier", task: "Email script: 'I'm a high school student creating a free resource for temporarily injured youth athletes — may I leave a few fliers in your waiting room?'" },
+      { id: "4f", channel: "Flier", task: "Print 20–30 fliers (Walgreens, FedEx, or home printer). Get feedback from a parent or teacher before printing the full batch." },
+    ]},
+  { week: 5, month: 2, theme: "Science Content Week", color: "#c0632a",
+    tasks: [
+      { id: "5a", channel: "Instagram", task: "Post: 'What's actually happening inside your body when you're healing' — illustrated breakdown (use Canva infographic template)" },
+      { id: "5b", channel: "Instagram", task: "Post: 'Runner's Blues is real — here's the science behind why you feel awful when you can't train' (cite a study, make it visual)" },
+      { id: "5c", channel: "Instagram", task: "Post: 'Why your doctor says rest but your brain is screaming' — cortisol and endorphin withdrawal explained simply" },
+      { id: "5d", channel: "Website", task: "Expand the Science page with a 'Recovery Timeline' graphic — what happens week by week during a typical bone or soft tissue injury" },
+      { id: "5e", channel: "All", task: "Reach out to a physical therapist or sports medicine doctor to review your science content for accuracy — or ask a biology teacher" },
+    ]},
+  { week: 6, month: 2, theme: "Hacks & Gear + Flier Drop", color: "#c0632a",
+    tasks: [
+      { id: "6a", channel: "Instagram", task: "Post: Water boot feature — what it is, why it matters, how it saved your summer. Be specific and real about your experience." },
+      { id: "6b", channel: "Instagram", task: "Post: 'Best gear for injured athletes' roundup — waterproof cast covers, shower bags, knee scooters vs crutches" },
+      { id: "6c", channel: "Instagram", task: "Story series: 'Things I wish I knew when I first got injured' — 5–7 slides, conversational, honest" },
+      { id: "6d", channel: "Flier", task: "Drop off fliers in person at 5+ offices — bring them in a folder, dress neatly, be friendly and brief" },
+      { id: "6e", channel: "Flier", task: "Post a photo of a flier in the wild to Instagram: 'These are officially out in the world 🙌'" },
+      { id: "6f", channel: "Flier", task: "Drop fliers at school: nurse's office, athletic training room, and guidance counselor" },
+    ]},
+  { week: 7, month: 2, theme: "Mental Health Focus + Community", color: "#c0632a",
+    tasks: [
+      { id: "7a", channel: "Instagram", task: "Post: 'What to say to an injured athlete (and what not to say)' — make it shareable, coaches and parents need this too" },
+      { id: "7b", channel: "Instagram", task: "Post: 'How to stay part of your team when you can't play' — film study, being at practice, staying in the group chat" },
+      { id: "7c", channel: "Instagram", task: "Share a quote or short story from someone else who's been injured — DM a teammate, friend, or classmate and ask if you can feature them" },
+      { id: "7d", channel: "All", task: "Email your school's athletic director or head coach — introduce the project and offer to present it briefly at a team meeting" },
+      { id: "7e", channel: "Instagram", task: "Run an Instagram Story poll or question box: 'What was the hardest part of being injured?' — use responses as future content" },
+    ]},
+  { week: 8, month: 2, theme: "Wrap-Up & Document Everything", color: "#c0632a",
+    tasks: [
+      { id: "8a", channel: "Instagram", task: "Final post: 'Here's what this project became' — recap, stats (followers, reach, fliers out), what you learned" },
+      { id: "8b", channel: "Website", task: "Add an 'About This Project' page: your name, your story, why you built this, what you hope it does" },
+      { id: "8c", channel: "All", task: "Screenshot everything: Instagram analytics, website visits, photos of fliers in offices — save to a folder labeled 'Portfolio Evidence'" },
+      { id: "8d", channel: "All", task: "Write a 1-page reflection: What problem did you solve? Who did you reach? What would you do differently? (This becomes your college essay material)" },
+      { id: "8e", channel: "All", task: "Decide whether to keep it running — even low-maintenance posting every few weeks keeps it alive and impressive for applications" },
+    ]},
+];
+
+const CHANNEL_COLORS = {
+  All:       { bg: "#F0F0F0", text: "#444" },
+  Research:  { bg: "#E8F4FD", text: "#1a6fa8" },
+  Branding:  { bg: "#F3E8FD", text: "#6a1fa8" },
+  Website:   { bg: "#E8FDF0", text: "#1a8a4a" },
+  Instagram: { bg: "#FDE8F0", text: "#a81a5a" },
+  Flier:     { bg: "#FDF5E8", text: "#a87a1a" },
+};
+
+const TAG_COLORS = {
+  Science: { bg: "#E8F4FD", text: "#1a6fa8" },
+  Mental:  { bg: "#F3E8FD", text: "#6a1fa8" },
+  Hack:    { bg: "#E8FDF0", text: "#1a8a4a" },
+  Story:   { bg: "#FDF5E8", text: "#a87a1a" },
+  Mine:    { bg: "#FFF0E8", text: "#c04a1a" },
+};
+
+const CHANNELS = ["All", "Instagram", "Website", "Flier", "Research", "Branding"];
+const TABS = ["Organizer", "Content Ideas", "Pillars"];
+const IDEA_TAGS = ["All", "Science", "Mental", "Hack", "Story", "Mine"];
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function App() {
+  const saved = useRef(loadSaved()).current;
+
+  const [tab, setTab] = useState("Organizer");
+
+  const [taskState, setTaskState] = useState(() => {
+    if (saved && saved.taskState) return saved.taskState;
+    const map = {};
+    INIT_WEEKS.forEach((w) => w.tasks.forEach((t) => (map[t.id] = false)));
+    return map;
+  });
+
+  const [customTasks, setCustomTasks] = useState(() => (saved && saved.customTasks) || {});
+  const [ideas, setIdeas] = useState(() => (saved && saved.ideas) || INIT_IDEAS);
+  const [nextId, setNextId] = useState(() => (saved && saved.nextId) || 1000);
+
+  const [activeWeek, setActiveWeek] = useState(null);
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [addingToWeek, setAddingToWeek] = useState(null);
+  const [newTaskText, setNewTaskText] = useState("");
+  const [newTaskChannel, setNewTaskChannel] = useState("All");
+  const [tagFilter, setTagFilter] = useState("All");
+  const [addingIdea, setAddingIdea] = useState(false);
+  const [newIdeaText, setNewIdeaText] = useState("");
+  const [newIdeaTag, setNewIdeaTag] = useState("Mine");
+  const [justSaved, setJustSaved] = useState(false);
+
+  useEffect(() => {
+    const payload = { taskState, customTasks, ideas, nextId };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    setJustSaved(true);
+    const t = setTimeout(() => setJustSaved(false), 900);
+    return () => clearTimeout(t);
+  }, [taskState, customTasks, ideas, nextId]);
+
+  const allWeeks = INIT_WEEKS.map((w) => ({
+    ...w,
+    tasks: [...w.tasks, ...(customTasks[w.week] || [])],
+  }));
+
+  const total = allWeeks.flatMap((w) => w.tasks).length;
+  const done = Object.values(taskState).filter(Boolean).length;
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+  const filteredWeeks = allWeeks
+    .map((w) => ({
+      ...w,
+      tasks: activeFilter === "All" ? w.tasks : w.tasks.filter((t) => t.channel === activeFilter),
+    }))
+    .filter((w) => w.tasks.length > 0);
+
+  const filteredIdeas = tagFilter === "All" ? ideas : ideas.filter((c) => c.tag === tagFilter);
+
+  const toggleTask = (id) => setTaskState((p) => ({ ...p, [id]: !p[id] }));
+
+  const deleteCustomTask = (weekNum, taskId) => {
+    setCustomTasks((prev) => ({
+      ...prev,
+      [weekNum]: (prev[weekNum] || []).filter((t) => t.id !== taskId),
+    }));
+    setTaskState((prev) => { const n = { ...prev }; delete n[taskId]; return n; });
+  };
+
+  const submitTask = (weekNum) => {
+    if (!newTaskText.trim()) return;
+    const id = "custom_" + nextId;
+    setNextId((n) => n + 1);
+    setCustomTasks((prev) => ({
+      ...prev,
+      [weekNum]: [...(prev[weekNum] || []), { id, channel: newTaskChannel, task: newTaskText.trim() }],
+    }));
+    setTaskState((prev) => ({ ...prev, [id]: false }));
+    setNewTaskText("");
+    setNewTaskChannel("All");
+    setAddingToWeek(null);
+  };
+
+  const deleteIdea = (id) => setIdeas((prev) => prev.filter((i) => i.id !== id));
+
+  const submitIdea = () => {
+    if (!newIdeaText.trim()) return;
+    const id = "idea_" + nextId;
+    setNextId((n) => n + 1);
+    setIdeas((prev) => [...prev, { id, tag: newIdeaTag, idea: newIdeaText.trim() }]);
+    setNewIdeaText("");
+    setNewIdeaTag("Mine");
+    setAddingIdea(false);
+  };
+
+  return (
+    <div style={{ fontFamily: "inherit", background: "#F6F6F2", minHeight: "100vh", paddingBottom: 70 }}>
+
+      <div style={{ background: "linear-gradient(135deg, #12294a 0%, #1e5080 100%)", color: "white", padding: "calc(env(safe-area-inset-top, 0px) + 28px) 20px 20px", textAlign: "center" }}>
+        <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 }}>College Passion Project</div>
+        <h1 style={{ margin: 0, fontSize: "clamp(20px, 5vw, 30px)", fontWeight: 800, lineHeight: 1.2 }}>Still In It</h1>
+        <p style={{ margin: "8px 0 0", fontSize: 14, opacity: 0.8 }}>Awareness for injured youth athletes — the science, the mental side, and the real hacks that help</p>
+
+        <div style={{ maxWidth: 380, margin: "20px auto 0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, opacity: 0.75, marginBottom: 5 }}>
+            <span>{done}/{total} tasks complete</span><span>{pct}%</span>
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.18)", borderRadius: 99, height: 7 }}>
+            <div style={{ background: "linear-gradient(90deg, #7ecfff, #a8e6cf)", width: pct + "%", height: "100%", borderRadius: 99, transition: "width 0.4s" }} />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 20 }}>
+          {TABS.map((t) => (
+            <button key={t} onClick={() => setTab(t)} style={{
+              padding: "7px 16px", borderRadius: 99, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600,
+              background: tab === t ? "white" : "rgba(255,255,255,0.15)",
+              color: tab === t ? "#12294a" : "white",
+            }}>{t}</button>
+          ))}
+        </div>
+      </div>
+
+      {tab === "Pillars" && (
+        <div style={{ padding: 16 }}>
+          <p style={{ fontSize: 13, color: "#666", marginBottom: 16, lineHeight: 1.6 }}>These are the four content pillars that make this project distinctive. Every post, page, and flier should connect to at least one of them.</p>
+          {PILLARS.map((p) => (
+            <div key={p.title} style={{ background: "white", borderRadius: 12, marginBottom: 12, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: "4px solid " + p.color }}>
+              <div style={{ padding: "16px 16px 14px" }}>
+                <div style={{ fontSize: 22, marginBottom: 6 }}>{p.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: "#1a1a1a", marginBottom: 6 }}>{p.title}</div>
+                <div style={{ fontSize: 13, color: "#555", lineHeight: 1.6 }}>{p.desc}</div>
+              </div>
+            </div>
+          ))}
+          <div style={{ background: "#12294a", borderRadius: 12, padding: "18px 16px", color: "white", marginTop: 4 }}>
+            <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", opacity: 0.55, marginBottom: 8 }}>Your Core Message</div>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, opacity: 0.92 }}>Being injured doesn't make you less of an athlete. Your identity, your drive, and your place on this team don't disappear because you're on the bench. This project exists to remind you of that — and to give you the real information and tools you need to get through it.</p>
+          </div>
+        </div>
+      )}
+
+      {tab === "Content Ideas" && (
+        <div style={{ padding: 16 }}>
+          <p style={{ fontSize: 13, color: "#666", marginBottom: 14, lineHeight: 1.6 }}>A bank of post ideas across your 4 pillars. Add your own below — tag them "Mine" to find them easily.</p>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+            {IDEA_TAGS.map((tag) => (
+              <button key={tag} onClick={() => setTagFilter(tag)} style={{
+                padding: "6px 14px", borderRadius: 99, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600,
+                background: tagFilter === tag ? "#12294a" : "#E8E8E3",
+                color: tagFilter === tag ? "white" : "#555",
+              }}>{tag === "All" ? "All Ideas" : tag}</button>
+            ))}
+          </div>
+
+          {filteredIdeas.map((item) => {
+            const tc = TAG_COLORS[item.tag] || TAG_COLORS["Mine"];
+            const isCustom = item.id.indexOf("idea_") === 0;
+            return (
+              <div key={item.id} style={{ background: "white", borderRadius: 10, padding: "13px 14px", marginBottom: 8, display: "flex", alignItems: "flex-start", gap: 10, boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                <div style={{ flexShrink: 0, fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: tc.bg, color: tc.text, marginTop: 1 }}>{item.tag}</div>
+                <div style={{ flex: 1, fontSize: 14, color: "#2a2a2a", lineHeight: 1.5 }}>{item.idea}</div>
+                {isCustom && (
+                  <button onClick={() => deleteIdea(item.id)} style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: "#ccc", fontSize: 16, padding: "0 2px", lineHeight: 1 }}>×</button>
+                )}
+              </div>
+            );
+          })}
+
+          {filteredIdeas.length === 0 && (
+            <div style={{ textAlign: "center", color: "#bbb", fontSize: 14, padding: "32px 0" }}>No ideas with this tag yet.</div>
+          )}
+
+          {!addingIdea ? (
+            <button onClick={() => setAddingIdea(true)} style={{
+              width: "100%", padding: "13px", marginTop: 8, borderRadius: 10, border: "2px dashed #D0D0C8",
+              background: "transparent", cursor: "pointer", fontSize: 14, color: "#888", fontWeight: 600,
+            }}>+ Add your own idea</button>
+          ) : (
+            <div style={{ background: "white", borderRadius: 12, padding: 16, marginTop: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#12294a", marginBottom: 12 }}>New Content Idea</div>
+              <textarea
+                value={newIdeaText}
+                onChange={(e) => setNewIdeaText(e.target.value)}
+                placeholder="Describe your idea..."
+                rows={3}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #E0E0D8", fontSize: 13, fontFamily: "inherit", resize: "vertical", boxSizing: "border-box", outline: "none" }}
+              />
+              <div style={{ marginTop: 10, marginBottom: 12 }}>
+                <div style={{ fontSize: 11, color: "#aaa", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Tag</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {["Science", "Mental", "Hack", "Story", "Mine"].map((tag) => {
+                    const tc = TAG_COLORS[tag];
+                    const sel = newIdeaTag === tag;
+                    return (
+                      <button key={tag} onClick={() => setNewIdeaTag(tag)} style={{
+                        padding: "5px 12px", borderRadius: 99, border: sel ? "none" : "1.5px solid #E0E0D8",
+                        cursor: "pointer", fontSize: 12, fontWeight: 600,
+                        background: sel ? tc.bg : "white", color: sel ? tc.text : "#888",
+                      }}>{tag}</button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={submitIdea} style={{ flex: 1, padding: "10px", borderRadius: 8, border: "none", background: "#12294a", color: "white", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Add Idea</button>
+                <button onClick={() => { setAddingIdea(false); setNewIdeaText(""); }} style={{ padding: "10px 16px", borderRadius: 8, border: "1.5px solid #E0E0D8", background: "white", color: "#888", fontSize: 13, cursor: "pointer" }}>Cancel</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "Organizer" && (
+        <div>
+          <div style={{ background: "#EEF5FF", borderLeft: "4px solid #1e5080", margin: "16px 16px 12px", padding: "13px 14px", borderRadius: "0 8px 8px 0", fontSize: 13, color: "#12294a", lineHeight: 1.6 }}>
+            <strong>Remember:</strong> Your angle is empowerment, not pity. You're giving injured athletes science they can understand, permission to feel bad, and actual tools to live their summer anyway — like you did.
+          </div>
+
+          <div style={{ padding: "0 16px", marginBottom: 16 }}>
+            <div style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: "#aaa", marginBottom: 8 }}>Filter by channel</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+              {CHANNELS.map((f) => (
+                <button key={f} onClick={() => setActiveFilter(f)} style={{
+                  padding: "5px 12px", borderRadius: 99, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600,
+                  background: activeFilter === f ? "#12294a" : "#E0E0D8",
+                  color: activeFilter === f ? "white" : "#555",
+                }}>{f}</button>
+              ))}
+            </div>
+          </div>
+
+          {[1, 2].map((mo) => {
+            const label = mo === 1 ? "Month 1 — Build It" : "Month 2 — Ship It";
+            const monthWeeks = filteredWeeks.filter((w) => w.month === mo);
+            if (!monthWeeks.length) return null;
+            return (
+              <div key={mo}>
+                <div style={{ padding: "4px 16px 4px", fontSize: 10, letterSpacing: 3, textTransform: "uppercase", fontWeight: 700, color: mo === 1 ? "#1e5080" : "#c0632a", marginBottom: 2 }}>── {label}</div>
+
+                {monthWeeks.map((week) => {
+                  const fullWeek = allWeeks.find((w) => w.week === week.week);
+                  const wDone = fullWeek.tasks.filter((t) => taskState[t.id]).length;
+                  const wTotal = fullWeek.tasks.length;
+                  const isOpen = activeWeek === week.week;
+
+                  return (
+                    <div key={week.week} style={{ margin: "0 16px 10px", background: "white", borderRadius: 12, boxShadow: isOpen ? "0 4px 18px rgba(0,0,0,0.09)" : "0 1px 4px rgba(0,0,0,0.06)", overflow: "hidden" }}>
+
+                      <div onClick={() => setActiveWeek(isOpen ? null : week.week)}
+                        style={{ display: "flex", alignItems: "center", padding: "14px 14px", cursor: "pointer", borderLeft: "4px solid " + week.color }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 10, color: "#aaa", marginBottom: 2 }}>Week {week.week}</div>
+                          <div style={{ fontWeight: 700, fontSize: 15, color: "#1a1a1a" }}>{week.theme}</div>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 99, background: wDone === wTotal ? "#d4f5e9" : "#f0f0ec", color: wDone === wTotal ? "#1a8a4a" : "#888" }}>
+                            {wDone}/{wTotal}
+                          </div>
+                          <div style={{ fontSize: 18, color: "#ccc", transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.2s" }}>›</div>
+                        </div>
+                      </div>
+
+                      {isOpen && (
+                        <div style={{ borderTop: "1px solid #F0F0EC" }}>
+                          {week.tasks.map((t) => {
+                            const ch = CHANNEL_COLORS[t.channel] || CHANNEL_COLORS["All"];
+                            const isCustom = t.id.indexOf("custom_") === 0;
+                            return (
+                              <div key={t.id}
+                                style={{ display: "flex", alignItems: "flex-start", gap: 11, padding: "12px 14px", borderBottom: "1px solid #F8F8F5", background: taskState[t.id] ? "#FAFFF8" : "white" }}>
+                                <div onClick={() => toggleTask(t.id)} style={{ marginTop: 2, width: 20, height: 20, borderRadius: 6, border: taskState[t.id] ? "none" : "2px solid #D0D0CA", background: taskState[t.id] ? "#2d9e6a" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
+                                  {taskState[t.id] && <span style={{ color: "white", fontSize: 12, fontWeight: 700 }}>✓</span>}
+                                </div>
+                                <div onClick={() => toggleTask(t.id)} style={{ flex: 1, fontSize: 13, color: taskState[t.id] ? "#aaa" : "#222", textDecoration: taskState[t.id] ? "line-through" : "none", lineHeight: 1.55, cursor: "pointer" }}>{t.task}</div>
+                                <div style={{ flexShrink: 0, fontSize: 10, fontWeight: 700, padding: "3px 7px", borderRadius: 6, background: ch.bg, color: ch.text }}>{t.channel}</div>
+                                {isCustom && (
+                                  <button onClick={() => deleteCustomTask(week.week, t.id)} style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: "#ccc", fontSize: 16, padding: "0 0 0 4px", lineHeight: 1 }}>×</button>
+                                )}
+                              </div>
+                            );
+                          })}
+
+                          {addingToWeek === week.week ? (
+                            <div style={{ padding: "12px 14px", background: "#FAFAF6", borderTop: "1px solid #F0F0EC" }}>
+                              <input
+                                autoFocus
+                                value={newTaskText}
+                                onChange={(e) => setNewTaskText(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === "Enter") submitTask(week.week); if (e.key === "Escape") setAddingToWeek(null); }}
+                                placeholder="What do you want to add?"
+                                style={{ width: "100%", padding: "9px 11px", borderRadius: 8, border: "1.5px solid #D8D8D0", fontSize: 13, fontFamily: "inherit", boxSizing: "border-box", outline: "none", marginBottom: 8 }}
+                              />
+                              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+                                {Object.keys(CHANNEL_COLORS).map((ch) => {
+                                  const c = CHANNEL_COLORS[ch];
+                                  const sel = newTaskChannel === ch;
+                                  return (
+                                    <button key={ch} onClick={() => setNewTaskChannel(ch)} style={{
+                                      padding: "4px 10px", borderRadius: 99, border: sel ? "none" : "1.5px solid #E0E0D8",
+                                      cursor: "pointer", fontSize: 11, fontWeight: 700,
+                                      background: sel ? c.bg : "white", color: sel ? c.text : "#999",
+                                    }}>{ch}</button>
+                                  );
+                                })}
+                              </div>
+                              <div style={{ display: "flex", gap: 8 }}>
+                                <button onClick={() => submitTask(week.week)} style={{ flex: 1, padding: "9px", borderRadius: 8, border: "none", background: "#12294a", color: "white", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Add Task</button>
+                                <button onClick={() => { setAddingToWeek(null); setNewTaskText(""); }} style={{ padding: "9px 14px", borderRadius: 8, border: "1.5px solid #E0E0D8", background: "white", color: "#888", fontSize: 13, cursor: "pointer" }}>Cancel</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button onClick={() => { setAddingToWeek(week.week); setNewTaskText(""); setNewTaskChannel("All"); }}
+                              style={{ width: "100%", padding: "11px 14px", border: "none", background: "#F8F8F5", cursor: "pointer", fontSize: 13, color: "#999", textAlign: "left", fontWeight: 600, borderTop: "1px solid #F0F0EC" }}>
+                              + Add a task to Week {week.week}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+
+          <div style={{ margin: "20px 16px 0", background: "#12294a", borderRadius: 12, padding: "18px 16px", color: "white" }}>
+            <div style={{ fontSize: 10, letterSpacing: 3, textTransform: "uppercase", opacity: 0.5, marginBottom: 12 }}>Tips from someone who gets it</div>
+            {[
+              "🦴 Your water boot story IS the campaign. Don't bury it — lead with it on Instagram.",
+              "🧠 'Runner's blues' is a searchable term. Using it brings people to you who are already looking.",
+              "🏥 Orthopedic and sports medicine waiting rooms are full of exactly your target audience — prioritize them for fliers.",
+              "📱 Reels that start with a personal statement ('When I broke my foot, I thought my summer was over') outperform everything else.",
+              "📊 Document follower counts, website visits, and fliers placed every week — you'll need these numbers for your college essay.",
+            ].map((tip, i, arr) => (
+              <div key={i} style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.88, marginBottom: i < arr.length - 1 ? 10 : 0 }}>{tip}</div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style={{
+        position: "fixed", bottom: 14, right: 14, fontSize: 11, color: "#aaa",
+        opacity: justSaved ? 1 : 0, transition: "opacity 0.5s", pointerEvents: "none",
+        background: "white", padding: "4px 10px", borderRadius: 99, boxShadow: "0 1px 4px rgba(0,0,0,0.08)"
+      }}>Saved ✓</div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+
+</body>
+</html>
