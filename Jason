@@ -1,0 +1,25 @@
+{
+  "name": "Still In It — Project Organizer",
+  "short_name": "Still In It",
+  "description": "2-month awareness campaign organizer for injured youth athletes",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F6F2",
+  "theme_color": "#12294a",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
